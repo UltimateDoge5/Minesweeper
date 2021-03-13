@@ -56,7 +56,7 @@ class MineSweeper {
         };
         this.checkForWin = () => {
             this.flaggedCells.forEach((cell) => {
-                if (cell.isFlagged == false)
+                if (cell.isMine == false)
                     return false;
                 cell.body.style.backgroundColor = "green";
             });
