@@ -11,14 +11,25 @@ const Grid = ({ mines }: { mines: number }) => {
 		for (let y = 0; y < size[0]; y++) {
 			grid.push([]);
 			for (let x = 0; x < size[1]; x++) {
-				const isMine = Math.random() < mines / (size[0] * size[1]);
 				grid[y].push({
 					y,
 					x,
 					state: "hidden",
-					isMine: isMine
+					isMine: false
 				});
 			}
+		}
+
+		//Place mines
+		let minesPlaced = 0;
+		while (minesPlaced < mines) {
+			const y = Math.floor(Math.random() * size[0]);
+			const x = Math.floor(Math.random() * size[1]);
+
+			if (grid[y][x].isMine) continue;
+
+			grid[y][x].isMine = true;
+			minesPlaced++;
 		}
 
 		setData(grid);
@@ -29,12 +40,12 @@ const Grid = ({ mines }: { mines: number }) => {
 		if (button === 0) {
 			if (cell.state !== "hidden") return;
 
-			const newGrid = [...data];
+			let newGrid = [...data];
 			if (cell.isMine) {
 				//Todo: Handle game over
 				newGrid[cell.y][cell.x].state = "revealed";
 			} else {
-				newGrid[cell.y][cell.x].state = "revealed";
+				newGrid = [...revealNeighbors(cell, newGrid)];
 			}
 
 			setData(newGrid);
@@ -73,20 +84,23 @@ const Grid = ({ mines }: { mines: number }) => {
 
 //Reveal cells around the clicked cell without neighbors nearby using recursion
 const revealNeighbors = (cell: CellData, grid: CellData[][]) => {
-	const newGrid = [...grid];
-	newGrid[cell.y][cell.x].state = "revealed";
+	grid[cell.y][cell.x].state = "revealed";
 
 	const neighbors = getCellNeighbors(cell, grid);
+	if (neighbors.filter((neighbor) => neighbor.isMine).length > 0) return grid;
+
 	for (let neighbor of neighbors) {
 		if (neighbor.state === "hidden" && !neighbor.isMine) {
 			const neighborNeighbors = getCellNeighbors(neighbor, grid);
 			if (neighborNeighbors.filter((neighbor) => neighbor.isMine).length === 0) {
-				revealNeighbors(neighbor, newGrid);
+				revealNeighbors(neighbor, grid);
+			} else {
+				grid[neighbor.y][neighbor.x].state = "revealed";
 			}
 		}
 	}
 
-	return newGrid;
+	return grid;
 };
 
 //Get the neighbors of a cell
