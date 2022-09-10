@@ -1,0 +1,28 @@
+#root {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 2rem;
+	text-align: center;
+}
+
+.row {
+	display: flex;
+}
+
+.cell {
+	width: 32px;
+	height: 32px;
+	/* border-radius: 6px; */
+	background-color: #90ee90;
+	transition: filter 0.15s ease-in-out;
+}
+
+.row:nth-child(even) .cell:nth-child(odd),
+.row:nth-child(odd) .cell:nth-child(even) {
+	background-color: #76c376;
+}
+
+.cell:hover {
+	/* background-color: lightcoral !important; */
+	filter: brightness(90%);
+}

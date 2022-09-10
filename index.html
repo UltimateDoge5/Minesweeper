@@ -1,37 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="style.css">
-        <title>Minesweeper</title>
-        <meta name="robots" content="noindex, nofollow">
-        <meta name="description" content="Minesweeper wrote in typescript">
-    </head>
-
-    <body>
-        <h1>Minesweeper</h1>
-        <div id="panel">
-            <label for="difficulty">Difficulty</label>
-            <select id="difficulty" autocomplete="off">
-                <option>Easy</option>
-                <option selected>Medium</option>
-                <option>Hard</option>
-            </select>
-
-
-            <span id="flags">🚩 40</span>
-            <span id="timer">🕛 0:00</span>
-        </div>
-
-        <main></main>
-    </body>
-
-    <script src="build/grid.js"></script>
-    <script src="build/index.js"></script>
-
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Minesweeper</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>
