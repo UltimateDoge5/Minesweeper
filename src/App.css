@@ -5,6 +5,14 @@
 	text-align: center;
 }
 
+div {
+	-webkit-user-drag: none;
+	-khtml-user-drag: none;
+	-moz-user-drag: none;
+	-o-user-drag: none;
+	user-select: none;
+}
+
 .row {
 	display: flex;
 }
@@ -12,9 +20,12 @@
 .cell {
 	width: 32px;
 	height: 32px;
-	/* border-radius: 6px; */
 	background-color: #90ee90;
 	transition: filter 0.15s ease-in-out;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .row:nth-child(even) .cell:nth-child(odd),
@@ -22,7 +33,15 @@
 	background-color: #76c376;
 }
 
-.cell:hover {
-	/* background-color: lightcoral !important; */
+.cell:not(.empty):hover {
 	filter: brightness(90%);
+}
+
+.cell.filled {
+	background-color: #e5c29f;
+}
+
+.row:nth-child(even) .cell:nth-child(odd).filled,
+.row:nth-child(odd) .cell:nth-child(even).filled {
+	background-color: #d7b899;
 }
