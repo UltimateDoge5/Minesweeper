@@ -55,6 +55,7 @@ export interface CellData {
 	x: number;
 	isMine: boolean;
 	state: CellState;
+	safe: boolean;
 }
 
 interface CellProps {

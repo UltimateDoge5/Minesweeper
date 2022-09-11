@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
-const Grid = ({ mines }: { mines: number }) => {
+const Grid = ({ mines, restartBtn }: { mines: number; restartBtn: React.RefObject<HTMLButtonElement> }) => {
 	const [data, setData] = useState<CellData[][]>([]);
 	const [size, setSize] = useState([16, 16]);
+	const isFirstClick = useRef(true);
 
 	//Generate the grid for the game
 	useEffect(() => {
@@ -15,32 +16,57 @@ const Grid = ({ mines }: { mines: number }) => {
 					y,
 					x,
 					state: "hidden",
-					isMine: false
+					isMine: false,
+					safe: false
 				});
 			}
 		}
 
+		setData(grid);
+	}, [size]);
+
+	useEffect(() => {
+		const button = restartBtn.current;
+		button?.addEventListener("click", restartGame);
+
+		return () => button?.removeEventListener("click", restartGame);
+	}, [restartBtn, size]);
+
+	//Mines are placed after the first click to prevent the first click from being a mine
+	const placeMines = (grid: CellData[][]) => {
 		//Place mines
 		let minesPlaced = 0;
 		while (minesPlaced < mines) {
 			const y = Math.floor(Math.random() * size[0]);
 			const x = Math.floor(Math.random() * size[1]);
 
-			if (grid[y][x].isMine) continue;
+			if (grid[y][x].isMine || grid[y][x].safe) continue;
 
 			grid[y][x].isMine = true;
 			minesPlaced++;
 		}
 
-		setData(grid);
-	}, [mines, size]);
+		return grid;
+	};
 
 	const handleCellClick = (cell: CellData, button: number) => {
 		//Left click
+		let newGrid = [...data];
 		if (button === 0) {
 			if (cell.state !== "hidden") return;
 
-			let newGrid = [...data];
+			if (isFirstClick.current) {
+				isFirstClick.current = false;
+
+				cell.safe = true;
+				getCellNeighbors(cell, newGrid).forEach((neighbor) => (neighbor.safe = true));
+
+				newGrid = placeMines(newGrid);
+				newGrid = revealNeighbors(cell, newGrid);
+				setData(newGrid);
+				return;
+			}
+
 			if (cell.isMine) {
 				//Todo: Handle game over
 				newGrid[cell.y][cell.x].state = "revealed";
@@ -50,13 +76,18 @@ const Grid = ({ mines }: { mines: number }) => {
 
 			setData(newGrid);
 		} else if (button === 2) {
+			//Right click
 			if (cell.state === "revealed") return;
 
-			const newGrid = [...data];
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
 
 			setData(newGrid);
 		}
+	};
+
+	const restartGame = () => {
+		isFirstClick.current = true;
+		setSize([size[0], size[1]]);
 	};
 
 	return (
