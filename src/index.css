@@ -65,4 +65,19 @@ button:focus-visible {
 
 .infoBar {
 	padding: 8px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	min-width: 512px;
+}
+
+.infoBar > *:not(button, .menu) {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 1.5em;
+
+	background-color: #1a1a1a;
+	padding: 8px;
+	border-radius: 8px;
 }

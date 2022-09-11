@@ -1,13 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
-const Grid = ({ mines, restartBtn }: { mines: number; restartBtn: React.RefObject<HTMLButtonElement> }) => {
+const Grid = ({ mines, restartBtn, size, onUiUpdate }: GridProps) => {
 	const [data, setData] = useState<CellData[][]>([]);
-	const [size, setSize] = useState([16, 16]);
 	const isFirstClick = useRef(true);
 
 	//Generate the grid for the game
 	useEffect(() => {
+		isFirstClick.current = true;
+		constructGrid(size);
+	}, [size]);
+
+	useEffect(() => {
+		const resetBoard = () => {
+			isFirstClick.current = true;
+			constructGrid(size);
+		};
+
+		const button = restartBtn.current;
+		button?.addEventListener("click", resetBoard);
+
+		return () => button?.removeEventListener("click", resetBoard);
+	}, [restartBtn, size]);
+
+	const constructGrid = (size: [number, number]) => {
 		const grid: CellData[][] = [];
 		for (let y = 0; y < size[0]; y++) {
 			grid.push([]);
@@ -23,18 +39,10 @@ const Grid = ({ mines, restartBtn }: { mines: number; restartBtn: React.RefObjec
 		}
 
 		setData(grid);
-	}, [size]);
-
-	useEffect(() => {
-		const button = restartBtn.current;
-		button?.addEventListener("click", restartGame);
-
-		return () => button?.removeEventListener("click", restartGame);
-	}, [restartBtn, size]);
+	};
 
 	//Mines are placed after the first click to prevent the first click from being a mine
 	const placeMines = (grid: CellData[][]) => {
-		//Place mines
 		let minesPlaced = 0;
 		while (minesPlaced < mines) {
 			const y = Math.floor(Math.random() * size[0]);
@@ -77,21 +85,15 @@ const Grid = ({ mines, restartBtn }: { mines: number; restartBtn: React.RefObjec
 			setData(newGrid);
 		} else if (button === 2) {
 			//Right click
-			if (cell.state === "revealed") return;
-
+			if (cell.state === "revealed" || isFirstClick.current) return;
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
-
+			onUiUpdate(cell.state === "flagged" ? -1 : 1);
 			setData(newGrid);
 		}
 	};
 
-	const restartGame = () => {
-		isFirstClick.current = true;
-		setSize([size[0], size[1]]);
-	};
-
 	return (
-		<div>
+		<div className="grid">
 			{data.map((row, rowIndex) => {
 				return (
 					<div className="row" key={rowIndex}>
@@ -148,5 +150,12 @@ const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
 
 	return neighbors;
 };
+
+interface GridProps {
+	mines: number;
+	size: [number, number];
+	restartBtn: React.RefObject<HTMLButtonElement>;
+	onUiUpdate: (flags: number) => void;
+}
 
 export default Grid;

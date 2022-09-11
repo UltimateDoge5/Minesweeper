@@ -5,8 +5,10 @@
 	text-align: center;
 }
 
-div {
+.grid {
 	user-select: none;
+	width: fit-content;
+	margin: auto;
 }
 
 .row {
