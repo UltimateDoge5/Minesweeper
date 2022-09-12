@@ -81,3 +81,20 @@ button:focus-visible {
 	padding: 8px;
 	border-radius: 8px;
 }
+
+footer {
+	padding: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	background-color: #1a1a1a;
+	box-sizing: border-box;
+}
+
+footer > * {
+	margin: 0;
+}

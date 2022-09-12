@@ -1,27 +1,46 @@
 import { useEffect, useRef, useState } from "react";
-import Grid from "./components/grid";
-import "./App.css";
-import "@szhsin/react-menu/dist/index.css";
-import "@szhsin/react-menu/dist/transitions/slide.css";
 import { Menu, MenuButton, MenuItem } from "@szhsin/react-menu";
+import Grid, { GameState } from "./components/grid";
+import JSConfetti from "js-confetti";
+import "./App.css";
+import { createPortal } from "react-dom";
+
+const jsConfetti = new JSConfetti();
 
 const App = () => {
 	const restartBtn = useRef<HTMLButtonElement>(null);
+	const timerRef = useRef(0);
 	const [difficulty, setDifficulty] = useState<Difficulty>(difficulties[1]);
 	const [ui, setUI] = useState({ time: 0, flags: difficulty.mines });
+	const [state, setState] = useState<GameState>("playing");
 
 	useEffect(() => {
-		const updateTimer = setInterval(() => {
+		timerRef.current = setInterval(() => {
 			if (ui.time < 999) setUI((ui) => ({ ...ui, time: ui.time + 1 }));
 		}, 1000);
 
-		return () => clearInterval(updateTimer);
+		return () => clearInterval(timerRef.current);
 	}, [ui.time]);
+
+	useEffect(() => {
+		if (state === "won") {
+			jsConfetti.addConfetti();
+			clearInterval(timerRef.current);
+		} else if (state === "lost") {
+			clearInterval(timerRef.current);
+		}
+	}, [state]);
 
 	return (
 		<div className="App">
 			<div className="infoBar">
-				<button ref={restartBtn} onClick={() => setUI({ ...ui, time: 0 })}>
+				<button
+					ref={restartBtn}
+					onClick={() => {
+						setState("playing");
+						setUI({ time: 0, flags: difficulty.mines });
+					}}
+				>
 					<RestartIcon />
 					Restart
 				</button>
@@ -42,6 +61,7 @@ const App = () => {
 								disabled={diff.name === difficulty.name}
 								onClick={() => {
 									setUI({ time: 0, flags: diff.mines });
+									setState("playing");
 									setDifficulty(diff);
 								}}
 							>
@@ -55,14 +75,39 @@ const App = () => {
 					<span className="label">{"0".repeat(3 - ui.time.toString().length) + ui.time}</span>
 				</div>
 
-				<span className="label">{`🚩 ${ui.flags}`}</span>
+				<span className="label">{`🚩 ${"0".repeat(difficulty.mines.toString().length - ui.flags.toString().length) + ui.flags}`}</span>
 			</div>
 			<Grid
 				mines={difficulty.mines}
 				size={difficulty.size}
+				disabled={state !== "playing"}
+				showMines={state === "lost"}
 				restartBtn={restartBtn}
 				onUiUpdate={(flags) => setUI({ ...ui, flags: ui.flags + flags })}
+				onStateUpdate={(state) => setState(state)}
 			/>
+
+			{state !== "playing" &&
+				createPortal(
+					<div className="overlay">
+						<h1>{state === "lost" ? "Gameover" : "Well done!"}</h1>
+
+						{state !== "lost" && <p style={{ fontSize: "1.8em" }}>You won in {ui.time} seconds</p>}
+						<span style={{ marginBottom: "8px" }}>Click the restart button to {state === "lost" ? "Restart" : "Play again"}</span>
+						<button onClick={() => restartBtn.current?.click()}>{state === "lost" ? "Restart" : "Play again"}</button>
+					</div>,
+					document.querySelector(".grid") as Element
+				)}
+
+			<footer>
+				v1.0.0
+				<p>
+					<a href="https://pkozak.org">Piotr Kozak</a> - 2022
+				</p>
+				<p>
+					<a href="https://github.com/UltimateDoge5/Minesweeper">Source code</a>
+				</p>
+			</footer>
 		</div>
 	);
 };
@@ -92,7 +137,7 @@ const DownArrowIcon = () => (
 const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 const difficulties: Difficulty[] = [
-	{ size: [9, 9], mines: 10, name: "beginner" },
+	{ size: [10, 10], mines: 10, name: "beginner" },
 	{ size: [16, 16], mines: 40, name: "intermediate" },
 	{ size: [16, 30], mines: 99, name: "expert" }
 ];

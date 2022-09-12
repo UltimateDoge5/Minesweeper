@@ -1,20 +1,22 @@
-const Cell = ({ state, isMine, neigbors, onClick }: CellProps) => {
+const Cell = ({ state, isMine, neigbors, larger, showMine, onClick }: CellProps) => {
 	const getCellContnet = (state: CellState) => {
-		if (state === "hidden") return "";
+		if (!isMine && state === "flagged" && showMine) return "❌";
+		if (isMine && (state === "revealed" || showMine)) return "💣";
 		if (state === "flagged") return "🚩";
-		if (isMine) return "💣";
+		if (state === "hidden") return "";
 		return neigbors || "";
 	};
 
 	const getCellClass = () => {
-		if (isMine && state === "hidden") return "";
 		if (state === "revealed" && neigbors === 0) return "filled empty";
 		if (state === "revealed" && neigbors) return "filled";
+		if (isMine && state === "hidden") return "";
+		return "";
 	};
 
 	return (
 		<div
-			className={`cell ${getCellClass()}`}
+			className={`cell ${getCellClass()} ${larger ? "larger" : ""}`}
 			style={{ color: getFontColor(neigbors) }}
 			onClick={(e) => onClick(e.button)}
 			onContextMenu={(e) => {
@@ -62,6 +64,8 @@ interface CellProps {
 	state: CellState;
 	neigbors: number;
 	isMine: boolean;
+	showMine: boolean;
+	larger: boolean;
 	onClick: (button: number) => void;
 }
 

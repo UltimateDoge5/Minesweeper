@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
-const Grid = ({ mines, restartBtn, size, onUiUpdate }: GridProps) => {
+const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate }: GridProps) => {
 	const [data, setData] = useState<CellData[][]>([]);
 	const isFirstClick = useRef(true);
 
@@ -58,8 +58,10 @@ const Grid = ({ mines, restartBtn, size, onUiUpdate }: GridProps) => {
 	};
 
 	const handleCellClick = (cell: CellData, button: number) => {
-		//Left click
+		if (disabled) return;
 		let newGrid = [...data];
+
+		//Left click
 		if (button === 0) {
 			if (cell.state !== "hidden") return;
 
@@ -78,18 +80,37 @@ const Grid = ({ mines, restartBtn, size, onUiUpdate }: GridProps) => {
 			if (cell.isMine) {
 				//Todo: Handle game over
 				newGrid[cell.y][cell.x].state = "revealed";
+				onStateUpdate("lost");
 			} else {
 				newGrid = [...revealNeighbors(cell, newGrid)];
 			}
 
+			const state = checkGameState(newGrid);
+			if (state === "won") onStateUpdate(state);
 			setData(newGrid);
 		} else if (button === 2) {
 			//Right click
 			if (cell.state === "revealed" || isFirstClick.current) return;
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
+			const state = checkGameState(newGrid);
+
+			if (state === "won") onStateUpdate(state);
 			onUiUpdate(cell.state === "flagged" ? -1 : 1);
 			setData(newGrid);
 		}
+	};
+
+	const checkGameState = (grid: CellData[][]) => {
+		let flaggedCells: CellData[] = [];
+		for (let row of grid) {
+			for (let cell of row) {
+				if (cell.state === "flagged") flaggedCells.push(cell);
+				else if (cell.state === "hidden" && !cell.isMine) return "playing";
+			}
+		}
+
+		if (flaggedCells.filter((cell) => cell.isMine).length !== mines) return "playing";
+		return "won";
 	};
 
 	return (
@@ -103,7 +124,9 @@ const Grid = ({ mines, restartBtn, size, onUiUpdate }: GridProps) => {
 									state={cell.state}
 									onClick={(button) => handleCellClick(cell, button)}
 									key={`${rowIndex}-${colIndex}`}
+									larger={size[0] == 10 && rowIndex <= 9 && colIndex <= 9}
 									neigbors={getCellNeighbors(cell, data).filter((neighbor) => neighbor.isMine).length}
+									showMine={showMines}
 									isMine={cell.isMine}
 								/>
 							);
@@ -151,11 +174,16 @@ const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
 	return neighbors;
 };
 
+export type GameState = "playing" | "won" | "lost";
+
 interface GridProps {
 	mines: number;
 	size: [number, number];
 	restartBtn: React.RefObject<HTMLButtonElement>;
+	disabled: boolean;
+	showMines: boolean;
 	onUiUpdate: (flags: number) => void;
+	onStateUpdate: (state: GameState) => void;
 }
 
 export default Grid;
