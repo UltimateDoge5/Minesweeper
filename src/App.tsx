@@ -90,7 +90,7 @@ const App = () => {
 			{state !== "playing" &&
 				createPortal(
 					<div className="overlay">
-						<h1>{state === "lost" ? "Gameover" : "Well done!"}</h1>
+						<h1>{state === "lost" ? "Game over" : "Well done!"}</h1>
 
 						{state !== "lost" && <p style={{ fontSize: "1.8em" }}>You won in {ui.time} seconds</p>}
 						<span style={{ marginBottom: "8px" }}>Click the restart button to {state === "lost" ? "Restart" : "Play again"}</span>
