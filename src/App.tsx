@@ -1,49 +1,56 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, MenuButton, MenuItem } from "@szhsin/react-menu";
 import Grid, { GameState } from "./components/grid";
-import JSConfetti from "js-confetti";
 import { createPortal } from "react-dom";
-import "./App.css";
+import JSConfetti from "js-confetti";
 import AudioPlayer from "./components/audioPlayer";
+import "./App.css";
 
 const jsConfetti = new JSConfetti();
 
-const initialMute = localStorage.getItem("mute") === "true";
+const initialMute = localStorage.getItem("muted") === "true";
 
 const App = () => {
 	const restartBtn = useRef<HTMLButtonElement>(null);
 	const timerRef = useRef(0);
 	const [difficulty, setDifficulty] = useState<Difficulty>(difficulties[1]);
-	const [ui, setUI] = useState({ time: 0, flags: difficulty.mines });
+	const [ui, setUI] = useState({time: 0, flags: difficulty.mines});
 	const [state, setState] = useState<GameState>("playing");
 	const [muted, setMuted] = useState(initialMute);
 	const player = useRef(new AudioPlayer());
-
+	
 	useEffect(() => {
 		if (muted) {
 			player.current.music.pause();
+			localStorage.setItem("muted", "true");
 		} else if (player.current.music.paused) {
 			player.current.music.play();
+			localStorage.setItem("muted", "false");
 		}
 	}, [muted]);
-
+	
 	useEffect(() => {
 		timerRef.current = setInterval(() => {
-			if (ui.time < 999) setUI((ui) => ({ ...ui, time: ui.time + 1 }));
+			if (ui.time < 999) setUI((ui) => ({...ui, time: ui.time + 1}));
 		}, 1000);
-
+		
 		return () => clearInterval(timerRef.current);
 	}, [ui.time]);
-
+	
 	useEffect(() => {
 		if (state === "won") {
+			clearInterval(timerRef.current);
 			jsConfetti.addConfetti();
-			clearInterval(timerRef.current);
+			player.current.play("win");
 		} else if (state === "lost") {
+			player.current.play("gameover");
 			clearInterval(timerRef.current);
+		} else {
+			setUI({time: 0, flags: difficulty.mines});
+			player.current.stop("gameover")
 		}
 	}, [state]);
-
+	
 	return (
 		<div className="App">
 			<div className="infoBar">
@@ -51,18 +58,18 @@ const App = () => {
 					ref={restartBtn}
 					onClick={() => {
 						setState("playing");
-						setUI({ time: 0, flags: difficulty.mines });
+						setUI({time: 0, flags: difficulty.mines});
 					}}
 				>
-					<RestartIcon />
+					<RestartIcon/>
 					Restart
 				</button>
-
+				
 				<div className="menu">
 					<Menu
 						menuButton={
 							<MenuButton>
-								<DownArrowIcon />
+								<DownArrowIcon/>
 								{capitalize(difficulty.name)}
 							</MenuButton>
 						}
@@ -73,7 +80,7 @@ const App = () => {
 								key={diff.name}
 								disabled={diff.name === difficulty.name}
 								onClick={() => {
-									setUI({ time: 0, flags: diff.mines });
+									setUI({time: 0, flags: diff.mines});
 									setState("playing");
 									setDifficulty(diff);
 								}}
@@ -84,11 +91,12 @@ const App = () => {
 					</Menu>
 				</div>
 				<div>
-					<ClockIcon />
+					<ClockIcon/>
 					<span className="label">{"0".repeat(3 - ui.time.toString().length) + ui.time}</span>
 				</div>
-
-				<span className="label">{`🚩 ${"0".repeat(difficulty.mines.toString().length - ui.flags.toString().length) + ui.flags}`}</span>
+				
+				<span
+					className="label">{`🚩 ${"0".repeat(difficulty.mines.toString().length - ui.flags.toString().length) + ui.flags}`}</span>
 			</div>
 			<Grid
 				mines={difficulty.mines}
@@ -96,26 +104,27 @@ const App = () => {
 				disabled={state !== "playing"}
 				showMines={state === "lost"}
 				restartBtn={restartBtn}
-				onUiUpdate={(flags) => setUI({ ...ui, flags: ui.flags + flags })}
+				onUiUpdate={(flags) => setUI({...ui, flags: ui.flags + flags})}
 				onStateUpdate={(state) => setState(state)}
+				onSoundEvent={(sound) => player.current.play(sound)}
 			/>
-
+			
 			{state !== "playing" &&
 				createPortal(
 					<div className="overlay">
 						<h1>{state === "lost" ? "Game over" : "Well done!"}</h1>
-
-						{state !== "lost" && <p style={{ fontSize: "1.8em" }}>You won in {ui.time} seconds</p>}
-						<span style={{ marginBottom: "8px" }}>Click the restart button to {state === "lost" ? "Restart" : "Play again"}</span>
+						
+						{state !== "lost" && <p style={{fontSize: "1.8em"}}>You won in {ui.time} seconds</p>}
+						<span
+							style={{marginBottom: "8px"}}>Click the restart button to {state === "lost" ? "Restart" : "Play again"}</span>
 						<button onClick={() => restartBtn.current?.click()}>{state === "lost" ? "Restart" : "Play again"}</button>
 					</div>,
-					document.querySelector(".grid") as Element
-				)}
-
+					(document.querySelector(".grid") as Element))}
+			
 			<button className="musicBtn" onClick={() => setMuted(!muted)}>
-				<MusicIcon muted={muted} />
+				<MusicIcon muted={muted}/>
 			</button>
-
+			
 			<footer>
 				v1.0.2
 				<span>
@@ -127,10 +136,11 @@ const App = () => {
 	);
 };
 
-const MusicIcon = ({ muted }: { muted: boolean }) => {
+const MusicIcon = ({muted}: { muted: boolean }) => {
 	if (muted) {
 		return (
-			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={32} height={32}>
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
+			     stroke="currentColor" width={32} height={32}>
 				<path
 					strokeLinecap="round"
 					strokeLinejoin="round"
@@ -139,9 +149,10 @@ const MusicIcon = ({ muted }: { muted: boolean }) => {
 			</svg>
 		);
 	}
-
+	
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={32} height={32}>
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+		     width={32} height={32}>
 			<path
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -152,7 +163,8 @@ const MusicIcon = ({ muted }: { muted: boolean }) => {
 };
 
 const RestartIcon = () => (
-	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={24} height={24}>
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+	     width={24} height={24}>
 		<path
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -162,23 +174,25 @@ const RestartIcon = () => (
 );
 
 const ClockIcon = () => (
-	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={32} height={32}>
-		<path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+	     width={32} height={32}>
+		<path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
 	</svg>
 );
 
 const DownArrowIcon = () => (
-	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width={24} height={24}>
-		<path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+	     width={24} height={24}>
+		<path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
 	</svg>
 );
 
 const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 const difficulties: Difficulty[] = [
-	{ size: [10, 10], mines: 10, name: "beginner" },
-	{ size: [16, 16], mines: 40, name: "intermediate" },
-	{ size: [16, 30], mines: 99, name: "expert" }
+	{size: [10, 10], mines: 10, name: "beginner"},
+	{size: [16, 16], mines: 40, name: "intermediate"},
+	{size: [16, 30], mines: 99, name: "expert"}
 ];
 
 interface Difficulty {

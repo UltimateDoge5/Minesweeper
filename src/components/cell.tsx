@@ -1,15 +1,15 @@
-const Cell = ({ state, isMine, neigbors, larger, showMine, onClick }: CellProps) => {
+const Cell = ({ state, isMine, neighbors, larger, showMine, onClick }: CellProps) => {
 	const getCellContnet = (state: CellState) => {
 		if (!isMine && state === "flagged" && showMine) return "❌";
 		if (state === "flagged") return "🚩";
 		if (isMine && (state === "revealed" || showMine)) return "💣";
 		if (state === "hidden") return "";
-		return neigbors || "";
+		return neighbors || "";
 	};
 
 	const getCellClass = () => {
-		if (state === "revealed" && neigbors === 0) return "filled empty";
-		if (state === "revealed" && neigbors) return "filled";
+		if (state === "revealed" && neighbors === 0) return "filled empty";
+		if (state === "revealed" && neighbors) return "filled";
 		if (isMine && state === "hidden") return "";
 		return "";
 	};
@@ -17,7 +17,7 @@ const Cell = ({ state, isMine, neigbors, larger, showMine, onClick }: CellProps)
 	return (
 		<div
 			className={`cell ${getCellClass()} ${larger ? "larger" : ""}`}
-			style={{ color: getFontColor(neigbors) }}
+			style={{ color: fontColors[neighbors - 1] }}
 			onClick={(e) => onClick(e.button)}
 			onContextMenu={(e) => {
 				e.preventDefault();
@@ -29,28 +29,7 @@ const Cell = ({ state, isMine, neigbors, larger, showMine, onClick }: CellProps)
 	);
 };
 
-const getFontColor = (neigbors: number) => {
-	switch (neigbors) {
-		case 1:
-			return "blue";
-		case 2:
-			return "green";
-		case 3:
-			return "red";
-		case 4:
-			return "purple";
-		case 5:
-			return "maroon";
-		case 6:
-			return "turquoise";
-		case 7:
-			return "black";
-		case 8:
-			return "grey";
-		default:
-			return "black";
-	}
-};
+const fontColors = ["blue","green","red","purple","orange","turquoise","black","grey"]
 
 export interface CellData {
 	y: number;
@@ -62,7 +41,7 @@ export interface CellData {
 
 interface CellProps {
 	state: CellState;
-	neigbors: number;
+	neighbors: number;
 	isMine: boolean;
 	showMine: boolean;
 	larger: boolean;
