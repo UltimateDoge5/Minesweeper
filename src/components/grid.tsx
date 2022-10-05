@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
 const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate, onSoundEvent }: GridProps) => {
@@ -75,6 +75,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 				newGrid = revealNeighbors(cell, newGrid);
 				setData(newGrid);
 				onSoundEvent("uncover")
+				onStateUpdate("playing");
 				return;
 			}
 
@@ -87,7 +88,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 			}
 
 			const state = checkGameState(newGrid);
-			if (state === "won") onStateUpdate(state);
+			if (state === "won") onStateUpdate("won");
 			setData(newGrid);
 		} else if (button === 2) {
 			//Right click
@@ -99,7 +100,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
 			const state = checkGameState(newGrid);
 
-			if (state === "won") onStateUpdate(state);
+			if (state === "won") onStateUpdate("won");
 			onUiUpdate(cell.state === "flagged" ? -1 : 1);
 			setData(newGrid);
 		}
@@ -179,12 +180,12 @@ const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
 	return neighbors;
 };
 
-export type GameState = "playing" | "won" | "lost";
+export type GameState = "playing" | "won" | "waiting"| "lost";
 
 interface GridProps {
 	mines: number;
 	size: [number, number];
-	restartBtn: React.RefObject<HTMLButtonElement>;
+	restartBtn: RefObject<HTMLButtonElement>;
 	disabled: boolean;
 	showMines: boolean;
 	onUiUpdate: (flags: number) => void;
