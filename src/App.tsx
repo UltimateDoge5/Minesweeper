@@ -29,7 +29,7 @@ const App = () => {
 	}, [muted]);
 
 	useEffect(() => {
-		timerRef.current = setInterval(() => {
+		timerRef.current = window.setInterval(() => {
 			if (state == "playing" && ui.time < 999) setUI((ui) => ({ ...ui, time: ui.time + 1 }));
 		},1000)
 
@@ -129,7 +129,7 @@ const App = () => {
 			</button>
 			
 			<footer>
-				v1.0.3
+				v1.0.4
 				<span>
 					<a href="https://pkozak.org">Piotr Kozak</a> - 2022
 				</span>
