@@ -107,9 +107,9 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 	};
 
 	const checkGameState = (grid: CellData[][]) => {
-		let flaggedCells: CellData[] = [];
-		for (let row of grid) {
-			for (let cell of row) {
+		const flaggedCells: CellData[] = [];
+		for (const row of grid) {
+			for (const cell of row) {
 				if (cell.state === "flagged") flaggedCells.push(cell);
 				else if (cell.state === "hidden" && !cell.isMine) return "playing";
 			}
@@ -151,7 +151,7 @@ const revealNeighbors = (cell: CellData, grid: CellData[][]) => {
 	const neighbors = getCellNeighbors(cell, grid);
 	if (neighbors.filter((neighbor) => neighbor.isMine).length > 0) return grid;
 
-	for (let neighbor of neighbors) {
+	for (const neighbor of neighbors) {
 		if (neighbor.state === "hidden" && !neighbor.isMine) {
 			const neighborNeighbors = getCellNeighbors(neighbor, grid);
 			if (neighborNeighbors.filter((neighbor) => neighbor.isMine).length === 0) {

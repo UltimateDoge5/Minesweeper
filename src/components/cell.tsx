@@ -1,5 +1,5 @@
 const Cell = ({ state, isMine, neighbors, larger, showMine, onClick }: CellProps) => {
-	const getCellContnet = (state: CellState) => {
+	const getCellContent = (state: CellState) => {
 		if (!isMine && state === "flagged" && showMine) return "❌";
 		if (state === "flagged") return "🚩";
 		if (isMine && (state === "revealed" || showMine)) return "💣";
@@ -24,12 +24,12 @@ const Cell = ({ state, isMine, neighbors, larger, showMine, onClick }: CellProps
 				onClick(2);
 			}}
 		>
-			{getCellContnet(state)}
+			{getCellContent(state)}
 		</div>
 	);
 };
 
-const fontColors = ["blue","green","red","purple","orange","turquoise","black","grey"]
+const fontColors = ["blue", "green", "red", "purple", "orange", "turquoise", "black", "grey"]
 
 export interface CellData {
 	y: number;

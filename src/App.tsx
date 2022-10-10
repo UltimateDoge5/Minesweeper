@@ -7,7 +7,7 @@ import AudioPlayer from "./components/audioPlayer";
 import "./App.css";
 
 const jsConfetti = new JSConfetti();
-const initialMute = localStorage.getItem("muted") === "true";
+const initialMute = localStorage.getItem("muted") === null ? true : localStorage.getItem("muted") === "true";
 
 const App = () => {
 	const restartBtn = useRef<HTMLButtonElement>(null);
@@ -19,6 +19,7 @@ const App = () => {
 	const player = useRef(new AudioPlayer());
 
 	useEffect(() => {
+		//We can ignore the promises
 		if (muted) {
 			player.current.music.pause();
 			localStorage.setItem("muted", "true");
@@ -45,10 +46,10 @@ const App = () => {
 			clearInterval(timerRef.current);
 			player.current.play("gameover");
 		} else if (state === "playing") {
-			setUI({ time: 0, flags: difficulty.mines });
-			player.current.stop("gameover")
+			setUI({ time: 0, flags: difficulty.mines })
 		} else{
 			clearInterval(timerRef.current);
+			player.current.stop("gameover")
 		}
 	}, [state]);
 
@@ -58,7 +59,7 @@ const App = () => {
 				<button
 					ref={restartBtn}
 					onClick={() => {
-						setState("playing");
+						setState("waiting");
 						setUI({ time: 0, flags: difficulty.mines });
 					}}
 				>
@@ -111,7 +112,7 @@ const App = () => {
 				onSoundEvent={(sound) => player.current.play(sound)}
 			/>
 
-			{state === "won" || state === "lost" &&
+			{(state === "won" || state === "lost") &&
 				createPortal(
 					<div className="overlay">
 						<h1>{state === "lost" ? "Game over" : "Well done!"}</h1>
@@ -129,7 +130,7 @@ const App = () => {
 			</button>
 			
 			<footer>
-				v1.0.4
+				v1.0.5
 				<span>
 					<a href="https://pkozak.org">Piotr Kozak</a> - 2022
 				</span>

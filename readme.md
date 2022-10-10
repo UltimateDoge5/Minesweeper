@@ -1,6 +1,7 @@
 # Minesweeper
 
 This is a simple implementation of the classic game Minesweeper. It is written in TypeScript and uses React for the UI and Vite for bundling.
+You can play it  by clicking [here](https://mines.pkozak.org/).
 
 ## About
 
@@ -12,8 +13,8 @@ I've returned to this project as I wanted to play minesweeper during boring less
 ### Missing Features
 
 -   Unsolvable board detection - There is a chance that the board will be unsolvable. I have not implemented a way to detect this yet.
--   Sound effects
--   PWA offline support
+-   ~~Sound effects~~
+-   ~~PWA offline support~~
 -   Animations?
 
 ## Credits and resources
