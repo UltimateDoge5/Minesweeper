@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
-const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate }: GridProps) => {
+const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate, onSoundEvent }: GridProps) => {
 	const [data, setData] = useState<CellData[][]>([]);
 	const isFirstClick = useRef(true);
 
@@ -74,36 +74,42 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 				newGrid = placeMines(newGrid);
 				newGrid = revealNeighbors(cell, newGrid);
 				setData(newGrid);
+				onSoundEvent("uncover")
+				onStateUpdate("playing");
 				return;
 			}
 
 			if (cell.isMine) {
-				//Todo: Handle game over
 				newGrid[cell.y][cell.x].state = "revealed";
 				onStateUpdate("lost");
 			} else {
 				newGrid = [...revealNeighbors(cell, newGrid)];
+				onSoundEvent("uncover")
 			}
 
 			const state = checkGameState(newGrid);
-			if (state === "won") onStateUpdate(state);
+			if (state === "won") onStateUpdate("won");
 			setData(newGrid);
 		} else if (button === 2) {
 			//Right click
 			if (cell.state === "revealed" || isFirstClick.current) return;
+			const flags = data.flat().filter((cell) => cell.state === "flagged").length;
+			if (flags >= mines && cell.state === "hidden") return;
+
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
+			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
 			const state = checkGameState(newGrid);
 
-			if (state === "won") onStateUpdate(state);
+			if (state === "won") onStateUpdate("won");
 			onUiUpdate(cell.state === "flagged" ? -1 : 1);
 			setData(newGrid);
 		}
 	};
 
 	const checkGameState = (grid: CellData[][]) => {
-		let flaggedCells: CellData[] = [];
-		for (let row of grid) {
-			for (let cell of row) {
+		const flaggedCells: CellData[] = [];
+		for (const row of grid) {
+			for (const cell of row) {
 				if (cell.state === "flagged") flaggedCells.push(cell);
 				else if (cell.state === "hidden" && !cell.isMine) return "playing";
 			}
@@ -125,7 +131,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 									onClick={(button) => handleCellClick(cell, button)}
 									key={`${rowIndex}-${colIndex}`}
 									larger={size[0] == 10 && rowIndex <= 9 && colIndex <= 9}
-									neigbors={getCellNeighbors(cell, data).filter((neighbor) => neighbor.isMine).length}
+									neighbors={getCellNeighbors(cell, data).filter((neighbor) => neighbor.isMine).length}
 									showMine={showMines}
 									isMine={cell.isMine}
 								/>
@@ -145,7 +151,7 @@ const revealNeighbors = (cell: CellData, grid: CellData[][]) => {
 	const neighbors = getCellNeighbors(cell, grid);
 	if (neighbors.filter((neighbor) => neighbor.isMine).length > 0) return grid;
 
-	for (let neighbor of neighbors) {
+	for (const neighbor of neighbors) {
 		if (neighbor.state === "hidden" && !neighbor.isMine) {
 			const neighborNeighbors = getCellNeighbors(neighbor, grid);
 			if (neighborNeighbors.filter((neighbor) => neighbor.isMine).length === 0) {
@@ -174,16 +180,17 @@ const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
 	return neighbors;
 };
 
-export type GameState = "playing" | "won" | "lost";
+export type GameState = "playing" | "won" | "waiting"| "lost";
 
 interface GridProps {
 	mines: number;
 	size: [number, number];
-	restartBtn: React.RefObject<HTMLButtonElement>;
+	restartBtn: RefObject<HTMLButtonElement>;
 	disabled: boolean;
 	showMines: boolean;
 	onUiUpdate: (flags: number) => void;
 	onStateUpdate: (state: GameState) => void;
+	onSoundEvent: (event: "uncover" | "flag" | "unflag") => void;
 }
 
 export default Grid;
