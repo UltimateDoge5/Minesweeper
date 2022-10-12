@@ -3,7 +3,7 @@
   "name": "Piotr Kozak | Minesweeper",
   "short_name": "Minesweeper",
   "description": "Minesweeper game clone",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#242424",
   "theme_color": "#90ee90",

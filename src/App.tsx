@@ -130,7 +130,7 @@ const App = () => {
 			</button>
 			
 			<footer>
-				v1.0.5
+				v1.0.6
 				<span>
 					<a href="https://pkozak.org">Piotr Kozak</a> - 2022
 				</span>
