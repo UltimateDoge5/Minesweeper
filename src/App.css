@@ -1,3 +1,7 @@
+:root{
+	--cell-font-size: 0px;
+}
+
 #root {
 	max-width: 1280px;
 	margin: 0 auto;
@@ -39,19 +43,20 @@
 .cell {
 	width: 32px;
 	height: 32px;
-	font-size: 1.1rem;
+	font-size: calc(1.1rem + var(--cell-font-size));
 	background-color: #90ee90;
 	transition: filter 0.15s ease-in-out, width 0.15s linear, height 0.15s linear;
 	cursor: pointer;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-weight: 600;
 }
 
 .larger {
 	width: 40px;
 	height: 40px;
-	font-size: 1.4rem;
+	font-size: calc(1.4rem + var(--cell-font-size));
 }
 
 .row:nth-child(even) .cell:nth-child(odd),

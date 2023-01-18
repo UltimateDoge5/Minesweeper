@@ -19,4 +19,4 @@ I've returned to this project as I wanted to play minesweeper during boring less
 
 ## Credits and resources
 - A [paper](https://dspace.cvut.cz/bitstream/handle/10467/68632/F3-BP-2017-Cicvarek-Jan-Algorithms%20for%20Minesweeper%20Game%20Grid%20Generation.pdf?sequence=-1&isAllowed=y) on board generation by Jan Cicvárek
-- Big thanks to [Karol Walterowicz](https://www.instagram.com/tytikar/) for making sounds and music!
+- Big thanks to [Karol Walterowicz](https://www.instagram.com/tytikar/) for making sounds!
