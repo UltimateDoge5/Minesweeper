@@ -23,11 +23,11 @@ const App = () => {
 	useEffect(() => {
 		//We can ignore the promises
 		if (muted) {
-			player.current.music.pause();
 			localStorage.setItem("muted", "true");
-		} else if (player.current.music.paused) {
-			player.current.music.play();
+			player.current.muted = true;
+		} else {
 			localStorage.setItem("muted", "false");
+			player.current.muted = false;
 		}
 	}, [muted]);
 
@@ -161,9 +161,9 @@ const App = () => {
 			</div>
 
 			<footer>
-				v1.0.6
+				v1.0.7
 				<span>
-					<a href="https://pkozak.org">Piotr Kozak</a> - 2022
+					<a href="https://pkozak.org">Piotr Kozak</a> - {new Date().getFullYear()}
 				</span>
 				<a href="https://github.com/UltimateDoge5/Minesweeper">Source code</a>
 			</footer>
